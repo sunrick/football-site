@@ -1,7 +1,15 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
+CSV.foreach(Kickme.root + "/csv/all.csv", :headers => true, :header_converters => :symbol) do |row|
+  row = row.to_hash
+  # Fix date, super hardcoded. Deal with it.
+  date = row[:date].split('/').reverse.map(&:to_i)
+  if date.first > 90
+    row[:date] = Date.new("19#{date.first}".to_i, date.second, date.third)
+  else
+    row[:date] = Date.new("20#{date.first}".to_i, date.second, date.third)
+  end
+  fixture = Fixture.find_by_identity(row)
+  if fixture.nil?
+    Fixture.create!(row)
+  end
+  # use row here...
+end
